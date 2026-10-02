@@ -23,36 +23,29 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: Install system packages
+      - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y \
-            git \
-            zip \
-            unzip \
-            autoconf \
-            automake \
-            libtool \
-            libltdl-dev \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            cmake \
-            libffi-dev \
-            libssl-dev \
-            gettext
+            git zip unzip autoconf automake libtool libltdl-dev \
+            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
+            cmake libffi-dev libssl-dev gettext
 
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip
           python -m pip install buildozer cython
 
-      - name: Install pygame-ce Android recipe
+      - name: Get pygame-ce recipe
         run: |
-          mkdir -p .buildozer/android/platform/python-for-android/pythonforandroid/recipes/pygame-ce
-          curl -L https://raw.githubusercontent.com/kivy/python-for-android/refs/pull/2971/head/pythonforandroid/recipes/pygame-ce/__init__.py \
-            -o .buildozer/android/platform/python-for-android/pythonforandroid/recipes/pygame-ce/__init__.py
+          git clone --depth 1 https://github.com/kivy/python-for-android.git p4a-custom
+          mkdir -p p4a-custom/pythonforandroid/recipes/pygame-ce
+          curl -L https://raw.githubusercontent.com/kivy/python-for-android/a54e9af8dcb5616f361c74cd2fbc5cb4c7ae952b/pythonforandroid/recipes/pygame-ce/__init__.py \
+            -o p4a-custom/pythonforandroid/recipes/pygame-ce/__init__.py
+
+      - name: Configure Buildozer
+        run: |
+          printf '\np4a.source_dir = %s/p4a-custom\n' "$GITHUB_WORKSPACE" >> buildozer.spec
 
       - name: Build APK
         run: |
