@@ -16,13 +16,12 @@ fullscreen = 1
 
 android.api = 35
 android.minapi = 23
-android.ndk = 27
-
 android.archs = arm64-v8a
 
 android.accept_sdk_license = True
 
 p4a.bootstrap = sdl2
+p4a.branch = develop
 
 [buildozer]
 
