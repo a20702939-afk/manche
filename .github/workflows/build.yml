@@ -6,67 +6,41 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
+
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: "3.x"
 
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          distribution: temurin
           java-version: "17"
+          distribution: "temurin"
 
-      - name: Install system packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            autoconf \
-            automake \
-            libtool \
-            libltdl-dev \
-            pkg-config \
-            build-essential
+      - name: Checkout
+        uses: actions/checkout@v7
 
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip
-          python -m pip install buildozer cython
+          python -m pip install buildozer
 
-      - name: Add pygame-ce Android recipe
+      - name: Install Linux dependencies
         run: |
-          mkdir -p recipes/pygame-ce
-
-          curl -L \
-            https://raw.githubusercontent.com/kivy/python-for-android/a54e9af8dcb5616f361c74cd2fbc5cb4c7ae952b/pythonforandroid/recipes/pygame-ce/__init__.py \
-            -o recipes/pygame-ce/__init__.py
-
-          echo "Recipe created:"
-          cat recipes/pygame-ce/__init__.py
-
-      - name: Configure local recipe
-        run: |
-          if ! grep -q "^p4a.local_recipes" buildozer.spec; then
-            echo "p4a.local_recipes = ./recipes" >> buildozer.spec
-          fi
-
-          echo "===== buildozer.spec ====="
-          cat buildozer.spec
+          sudo apt update
+          sudo apt -y install automake libltdl-dev
 
       - name: Build APK
         run: |
-          buildozer -v android debug
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
