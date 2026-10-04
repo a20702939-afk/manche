@@ -9,14 +9,13 @@ source.include_exts = py,png,jpg,jpeg,wav,ogg,ttf,otf
 
 version = 1.0
 
-requirements = python3,pygame-ce
+requirements = python3,pygame
 
 orientation = portrait
 fullscreen = 1
 
 android.api = 35
 android.minapi = 23
-android.ndk = 28c
 android.archs = arm64-v8a
 
 android.accept_sdk_license = True
