@@ -1,46 +1,66 @@
 name: Build MANCH APK
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 env:
-  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
+  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: "0"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.x"
+          python-version: "3.14"
 
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
+          distribution: temurin
           java-version: "17"
-          distribution: "temurin"
 
-      - name: Checkout
-        uses: actions/checkout@v7
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            python3-pip \
+            python3-virtualenv \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo6 \
+            cmake \
+            libffi-dev \
+            libssl-dev \
+            automake \
+            autopoint \
+            gettext
 
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip
-          python -m pip install buildozer
-
-      - name: Install Linux dependencies
-        run: |
-          sudo apt update
-          sudo apt -y install automake libltdl-dev
+          python -m pip install git+https://github.com/kivy/buildozer.git
+          python -m pip install legacy-cgi setuptools cython==0.29.34
 
       - name: Build APK
         run: |
-          buildozer android debug
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
