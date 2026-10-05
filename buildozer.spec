@@ -1,47 +1,80 @@
-[app]
+name: Build MANCH APK
 
-# (str) Title of your application
-title = MANCH
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
-# (str) Package name
-package.name = manch
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-22.04
 
-# (str) Package domain (needed for android/ios packaging)
-package.domain = org.manch
+    steps:
 
-# (str) Source code where the main.py live
-source.dir = .
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-# (list) Source files to include (let empty to include all the files)
-source.include_exts = ttf,py,png,jpg,jpeg,wav,ogg,json
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-# (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,data/*
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-# (list) Source files to exclude (let empty to not exclude anything)
-#source.exclude_exts = spec
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
 
-# (list) List of directories to exclude (let empty to not exclude anything)
-#source.exclude_dirs = tests, bin, venv
+          sudo apt-get install -y \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            python3-pip \
+            autoconf \
+            automake \
+            libtool \
+            libltdl-dev \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake \
+            libffi-dev \
+            libssl-dev
 
-# (list) List of exclusions using pattern matching
-#source.exclude_patterns = license,images/*/*.jpg
+      - name: Install Buildozer
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install buildozer
+          python -m pip install cython==0.29.34
 
-# (str) Application version
-version = 1.0
+      - name: Remove old Buildozer cache
+        run: |
+          rm -rf ~/.buildozer
+          rm -rf .buildozer
+          rm -rf bin
 
-# (list) Application requirements
-requirements = python3,pygame
+      - name: Verify configuration
+        run: |
+          python --version
+          java -version
+          buildozer --version
 
-# (str) Supported orientation (one of landscape, sensorLandscape, portrait or
-# all)
-orientation = portrait
+      - name: Build APK
+        run: |
+          buildozer -v android debug
 
-# (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
-
-# (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
-
-# (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MANCH-APK
+          path: bin/*.apk
+          if-no-files-found: error
