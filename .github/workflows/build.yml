@@ -25,29 +25,32 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            autoconf \
-            automake \
-            libtool \
-            libltdl-dev \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libffi-dev \
-            libssl-dev
+            git zip unzip autoconf automake libtool libltdl-dev \
+            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libffi-dev libssl-dev
 
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip
           python -m pip install buildozer
           python -m pip install cython==0.29.34
+
+      - name: Install Android SDK Build Tools
+        run: |
+          yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Check AIDL
+        run: |
+          ls -l ${ANDROID_HOME}/build-tools/35.0.0/aidl
+          ${ANDROID_HOME}/build-tools/35.0.0/aidl --version
 
       - name: Build APK
         run: |
