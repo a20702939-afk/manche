@@ -1,80 +1,37 @@
-name: Build MANCH APK
+[app]
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+title = MANCH
+package.name = manch
+package.domain = org.manch
 
-jobs:
-  build:
-    name: Build Android APK
-    runs-on: ubuntu-22.04
+source.dir = .
+source.include_exts = py,png,jpg,jpeg,wav,ogg,ttf,otf,json
 
-    steps:
+source.exclude_dirs = bin,.git,.github,__pycache__
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+version = 1.0
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+requirements = python3,pygame
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+orientation = portrait
+fullscreen = 1
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
+android.api = 35
+android.minapi = 23
+android.ndk = 28c
+android.ndk_api = 23
 
-          sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            openjdk-17-jdk \
-            python3-pip \
-            autoconf \
-            automake \
-            libtool \
-            libltdl-dev \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libtinfo5 \
-            cmake \
-            libffi-dev \
-            libssl-dev
+android.archs = arm64-v8a
 
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install buildozer
-          python -m pip install cython==0.29.34
+android.accept_sdk_license = True
 
-      - name: Remove old Buildozer cache
-        run: |
-          rm -rf ~/.buildozer
-          rm -rf .buildozer
-          rm -rf bin
+android.debug_artifact = apk
+android.release_artifact = apk
 
-      - name: Verify configuration
-        run: |
-          python --version
-          java -version
-          buildozer --version
+p4a.bootstrap = sdl2
+p4a.branch = master
 
-      - name: Build APK
-        run: |
-          buildozer -v android debug
+[buildozer]
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: MANCH-APK
-          path: bin/*.apk
-          if-no-files-found: error
+log_level = 2
+warn_on_root = 1
