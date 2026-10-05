@@ -8,30 +8,47 @@ on:
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout
+
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Install system dependencies
+      - name: Install Linux dependencies
         run: |
           sudo apt-get update
+
           sudo apt-get install -y \
-            git zip unzip autoconf automake libtool libltdl-dev \
-            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
-            libffi-dev libssl-dev
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            python3-pip \
+            autoconf \
+            automake \
+            libtool \
+            libltdl-dev \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake \
+            libffi-dev \
+            libssl-dev
 
       - name: Install Buildozer
         run: |
@@ -39,25 +56,25 @@ jobs:
           python -m pip install buildozer
           python -m pip install cython==0.29.34
 
-      - name: Install Android SDK Build Tools
+      - name: Remove old Buildozer cache
         run: |
-          yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+          rm -rf ~/.buildozer
+          rm -rf .buildozer
+          rm -rf bin
 
-      - name: Check AIDL
+      - name: Verify configuration
         run: |
-          ls -l ${ANDROID_HOME}/build-tools/35.0.0/aidl
-          ${ANDROID_HOME}/build-tools/35.0.0/aidl --version
+          python --version
+          java -version
+          buildozer --version
 
       - name: Build APK
         run: |
-          buildozer android debug
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: MANCH-APK
           path: bin/*.apk
+          if-no-files-found: error
