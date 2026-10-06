@@ -25,17 +25,16 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Linux dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             git zip unzip \
             autoconf automake libtool \
             libltdl-dev pkg-config \
-            zlib1g-dev \
-            libncurses5-dev libncursesw5-dev \
-            libffi-dev libssl-dev \
-            cmake
+            zlib1g-dev libncurses5-dev \
+            libncursesw5-dev libffi-dev \
+            libssl-dev cmake
 
       - name: Install Buildozer
         run: |
@@ -43,19 +42,19 @@ jobs:
           python -m pip install buildozer
           python -m pip install "cython==0.29.34"
 
-      - name: Get python-for-android with pygame-ce
-        run: |
-          git clone --depth 1 --branch develop \
-            https://github.com/kivy/python-for-android.git \
-            p4a
-
-      - name: Add pygame-ce recipe
+      - name: Download pygame-ce recipe
         run: |
           mkdir -p recipes/pygame-ce
-          cp p4a/pythonforandroid/recipes/pygame-ce/__init__.py \
-             recipes/pygame-ce/__init__.py
+          curl -L \
+            https://raw.githubusercontent.com/kivy/python-for-android/a54e9af8dcb5616f361c74cd2fbc5cb4c7ae952b/pythonforandroid/recipes/pygame-ce/__init__.py \
+            -o recipes/pygame-ce/__init__.py
 
-      - name: Clean Buildozer
+      - name: Check recipe
+        run: |
+          test -s recipes/pygame-ce/__init__.py
+          echo "pygame-ce recipe OK"
+
+      - name: Clean
         run: |
           rm -rf .buildozer
           rm -rf bin
