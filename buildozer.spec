@@ -6,12 +6,11 @@ package.domain = org.manch
 
 source.dir = .
 source.include_exts = py,png,jpg,jpeg,wav,ogg,ttf,otf,json
-
 source.exclude_dirs = bin,.git,.github,__pycache__
 
 version = 1.0
 
-requirements = python3,pygame
+requirements = python3,pygame-ce
 
 orientation = portrait
 fullscreen = 1
@@ -20,16 +19,13 @@ android.api = 35
 android.minapi = 23
 android.ndk = 28c
 android.ndk_api = 23
-
 android.archs = arm64-v8a
 
 android.accept_sdk_license = True
 
-android.debug_artifact = apk
-android.release_artifact = apk
-
 p4a.bootstrap = sdl2
-p4a.branch = master
+p4a.branch = develop
+p4a.local_recipes = ./recipes
 
 [buildozer]
 
