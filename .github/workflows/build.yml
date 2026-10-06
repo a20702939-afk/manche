@@ -14,40 +14,48 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Linux dependencies
+      - name: Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git zip unzip autoconf automake libtool \
-            libltdl-dev pkg-config zlib1g-dev \
+            git zip unzip \
+            autoconf automake libtool \
+            libltdl-dev pkg-config \
+            zlib1g-dev \
             libncurses5-dev libncursesw5-dev \
-            libffi-dev libssl-dev cmake
+            libffi-dev libssl-dev \
+            cmake
 
       - name: Install Buildozer
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel
           python -m pip install buildozer
-          python -m pip install cython==0.29.34
+          python -m pip install "cython==0.29.34"
+
+      - name: Get python-for-android with pygame-ce
+        run: |
+          git clone --depth 1 --branch develop \
+            https://github.com/kivy/python-for-android.git \
+            p4a
 
       - name: Add pygame-ce recipe
         run: |
           mkdir -p recipes/pygame-ce
-          curl -L \
-            -o recipes/pygame-ce/__init__.py \
-            https://raw.githubusercontent.com/kivy/python-for-android/a54e9af8dcb5616f361c74cd2fbc5cb4c7ae952b/pythonforandroid/recipes/pygame-ce/__init__.py
+          cp p4a/pythonforandroid/recipes/pygame-ce/__init__.py \
+             recipes/pygame-ce/__init__.py
 
-      - name: Clean old build
+      - name: Clean Buildozer
         run: |
           rm -rf .buildozer
           rm -rf bin
