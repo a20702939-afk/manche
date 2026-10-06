@@ -8,47 +8,31 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
     runs-on: ubuntu-22.04
 
     steps:
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Setup Java
+      - name: Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Linux dependencies
+      - name: Linux dependencies
         run: |
           sudo apt-get update
-
           sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            openjdk-17-jdk \
-            python3-pip \
-            autoconf \
-            automake \
-            libtool \
-            libltdl-dev \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libtinfo5 \
-            cmake \
-            libffi-dev \
-            libssl-dev
+            git zip unzip autoconf automake libtool \
+            libltdl-dev pkg-config zlib1g-dev \
+            libncurses5-dev libncursesw5-dev \
+            libffi-dev libssl-dev cmake
 
       - name: Install Buildozer
         run: |
@@ -56,17 +40,17 @@ jobs:
           python -m pip install buildozer
           python -m pip install cython==0.29.34
 
-      - name: Remove old Buildozer cache
+      - name: Add pygame-ce recipe
         run: |
-          rm -rf ~/.buildozer
+          mkdir -p recipes/pygame-ce
+          curl -L \
+            -o recipes/pygame-ce/__init__.py \
+            https://raw.githubusercontent.com/kivy/python-for-android/a54e9af8dcb5616f361c74cd2fbc5cb4c7ae952b/pythonforandroid/recipes/pygame-ce/__init__.py
+
+      - name: Clean old build
+        run: |
           rm -rf .buildozer
           rm -rf bin
-
-      - name: Verify configuration
-        run: |
-          python --version
-          java -version
-          buildozer --version
 
       - name: Build APK
         run: |
